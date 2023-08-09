@@ -1,18 +1,15 @@
 
-const sql = require('mssql');
+const { Pool, Client } = require('pg');
 
 const config = {
-   user: 'afv40_aplicacao',
-   password: 'JBA3NuKL8YBdeN7',
-   server: '10.0.2.15',
-   database: 'AFV40',
-   options: {
-      encrypt: true,
-      trustServerCertificate: true,
-   },
-};
+   user: 'afv_aplicacao',
+   host: 'localhost',
+   database: 'afv',
+   password: '1234',
+   port: 5432, 
+ };
 
-const pool = new sql.ConnectionPool(config);
+const pool = new Pool(config);
 
 module.exports = {
    pool
