@@ -1,7 +1,7 @@
 import {BrowserRouter, Routes, Route} from 'react-router-dom'
 
-import Login from '../components/pages/Login'
-import Main from '../components/pages/Main'
+import Login from '../pages/Login'
+import Main from '../pages/Main'
 
 const Rotas = () => {
     return(

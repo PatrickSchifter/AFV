@@ -7,8 +7,8 @@ import './style.css'
 const UserMenuIcon = () => {
     const {userMenuOpen ,setUserMenuOpen, setUserMenuRef} = useContext(MenuContext);
 
-    const userData = JSON.parse(localStorage.getItem('userData'));
-    const userName = userData.Nome;
+    //const userData = JSON.parse(localStorage.getItem('userData'));
+    //const userName = userData.Nome;
 
     const handleClickUserIcon = (e) => {
       setUserMenuOpen(!userMenuOpen);
@@ -22,7 +22,7 @@ const UserMenuIcon = () => {
         <div className='user-icon-wrap'>
             <FaUserAlt id='user-icon'/>
         </div>
-        <p>Olá, {userName}<FaSortDown id='arrow-user' /></p>
+        <p>Olá, Patrick<FaSortDown id='arrow-user' /></p>
     </div>
     
   )

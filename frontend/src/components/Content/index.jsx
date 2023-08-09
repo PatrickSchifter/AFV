@@ -1,80 +1,145 @@
-import React, {useContext} from 'react';
+import React, {useContext, useRef, useState} from 'react';
 
-import { ContentProvider } from '../../contexts/contentContext';
+import { ContentProvider, ContentContext } from '../../contexts/contentContext';
 
 import PopUpMenuUser from '../PopUpMenuUser';
 import Tabs from '../Tabs';
 import { MenuContext } from '../../contexts/menuContext';
 
-import Clientes from '../MenusContent/Clientes';
-import GraficosDashboard from '../MenusContent/GraficosDashboard';
-import Representada from '../MenusContent/Representadas';
-import CadastroDeProdutos from '../MenusContent/CadastroDeProdutos';
-import TabelasDePrecos from '../MenusContent/TabelasDePrecos';
-import WorkFlowDeOrcamentos from '../MenusContent/WorkFlowDeOrcamentos';
-import CarteiraDePedido from '../MenusContent/CarteiraDePedido';
-import EmpresaControladora from '../MenusContent/EmpresaControladora';
-import LocaisDeVenda from '../MenusContent/LocaisDeVenda';
-import Ofertas from '../MenusContent/Ofertas';
-import PoliticasDeComissoes from '../MenusContent/PoliticasDeComissoes';
-import ComissoesXDesconto from '../MenusContent/ComissoesXDesconto';
-import PrecoXEstrutura from '../MenusContent/PrecoXEstrutura';
-import PrecoXPrazo from '../MenusContent/PrecoXPrazo';
-import DescontoVolume from '../MenusContent/DescontoVolume';
-import DescontoPorTipoDeCliente from '../MenusContent/DescontoPorTipoDeCliente';
-import FreteCIF from '../MenusContent/FreteCIF';
-import TipoDePedido from '../MenusContent/TipoDePedido';
-import CondicoesDePagamento from '../MenusContent/CondicaoDePagamento';
-import PrazoDePagamento from '../MenusContent/PrazoDePagamento';
-import DescontoComercial from '../MenusContent/DescontoComercial';
-import LinhasDeProdutos from '../MenusContent/LinhaDeProduto';
-import Margens from '../MenusContent/Margens';
-import RegrasDePrecos from '../MenusContent/RegrasDePrecos';
-import Mensagens from '../MenusContent/Mensagens';
-import RegioesDeVendas from '../MenusContent/RegioesDeVendas';
-import WorkFlow from '../MenusContent/WorkFlow';
-import PerfilDeAcesso from '../MenusContent/PerfilDeAcesso';
-import Usuarios from '../MenusContent/Usuarios';
+import Clientes from '../../fontes/Clientes';
+import GraficosDashboard from '../../fontes/GraficosDashboard';
+import Representada from '../../fontes/Representadas';
+import CadastroDeProdutos from '../../fontes/CadastroDeProdutos';
+import TabelasDePrecos from '../../fontes/TabelasDePrecos';
+import WorkFlowDeOrcamentos from '../../fontes/WorkFlowDeOrcamentos';
+import CarteiraDePedido from '../../fontes/CarteiraDePedido';
+import EmpresaControladora from '../../fontes/EmpresaControladora';
+import LocaisDeVenda from '../../fontes/LocaisDeVenda';
+import Ofertas from '../../fontes/Ofertas';
+import PoliticasDeComissoes from '../../fontes/PoliticasDeComissoes';
+import ComissoesXDesconto from '../../fontes/ComissoesXDesconto';
+import PrecoXEstrutura from '../../fontes/PrecoXEstrutura';
+import PrecoXPrazo from '../../fontes/PrecoXPrazo';
+import DescontoVolume from '../../fontes/DescontoVolume';
+import DescontoPorTipoDeCliente from '../../fontes/DescontoPorTipoDeCliente';
+import FreteCIF from '../../fontes/FreteCIF';
+import TipoDePedido from '../../fontes/TipoDePedido';
+import CondicoesDePagamento from '../../fontes/CondicaoDePagamento';
+import PrazoDePagamento from '../../fontes/PrazoDePagamento';
+import DescontoComercial from '../../fontes/DescontoComercial';
+import LinhasDeProdutos from '../../fontes/LinhaDeProduto';
+import Margens from '../../fontes/Margens';
+import RegrasDePrecos from '../../fontes/RegrasDePrecos';
+import Mensagens from '../../fontes/Mensagens';
+import RegioesDeVendas from '../../fontes/RegioesDeVendas';
+import WorkFlow from '../../fontes/WorkFlow';
+import PerfilDeAcesso from '../../fontes/PerfilDeAcesso';
+import Usuarios from '../../fontes/Usuarios';
+import PopUp from '../PopUp';
 
 const Content = () => {
 
-  const {activeTab} = useContext(MenuContext);
+  const {activeTab, menuTabs} = useContext(MenuContext);
 
+  const windowW = window.innerWidth / 4;
+  const windowH = window.innerHeight / 4;
+
+  const [popUp, setPopUp] = useState(0)
+
+  const [isDragging, setIsDragging] = useState(false);
+  const [position, setPosition] = useState([{popUp: 0, x: windowW, y: windowH }]);
+  const [startPosition, setStartPosition] = useState({ x: 0, y: 0 });
+
+  const divRef = useRef(null);
+
+  const handleMouseMove = (event) => {
+    event.preventDefault();
+    if (!isDragging) return;
+
+    const newPosition = {
+      popUp: popUp,
+      x: event.clientX - startPosition.x,
+      y: event.clientY - startPosition.y
+    };
+
+    const { offsetWidth, offsetHeight } = divRef.current;
+    const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
+
+
+    // Verifica se a nova posição ultrapassa os limites da janela
+    if (newPosition.x < 0) {
+        newPosition.x = 0;
+    } else if (newPosition.x + offsetWidth > windowWidth) {
+        newPosition.x = windowWidth - offsetWidth;
+    }
+
+    if (newPosition.y < 0) {
+        newPosition.y = 0;
+    } else if (newPosition.y + offsetHeight > windowHeight) {
+        newPosition.y = windowHeight - offsetHeight;
+    }
+
+    const newArrayPosition = [...position];
+    newArrayPosition[popUp] = newPosition;
+    setPosition(newArrayPosition);
+};
+
+const handleMouseUp = () => {
+    setIsDragging(false);
+};
 
   return (
-    <div className='content-container'>
+    <div 
+      className='content-container' 
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+    >
       <PopUpMenuUser />
-      <Tabs />
-      {activeTab === 2? <GraficosDashboard />: <div></div>}
-      
-      {activeTab === 4? <ContentProvider><Clientes /></ContentProvider>: <div></div>}
-      {activeTab === 5? <Representada />: <div></div>}
-      {activeTab === 7? <CadastroDeProdutos />: <div></div>}
-      {activeTab === 9? <TabelasDePrecos />: <div></div>}
-      {activeTab === 11? <WorkFlowDeOrcamentos />: <div></div>}
-      {activeTab === 12? <CarteiraDePedido />: <div></div>}
-      {activeTab === 14? <EmpresaControladora />: <div></div>}
-      {activeTab === 15? <LocaisDeVenda />: <div></div>}
-      {activeTab === 17? <Ofertas />: <div></div>}
-      {activeTab === 18? <PoliticasDeComissoes />: <div></div>}
-      {activeTab === 19? <ComissoesXDesconto />: <div></div>}
-      {activeTab === 20? <PrecoXEstrutura />: <div></div>}
-      {activeTab === 21? <PrecoXPrazo />: <div></div>}
-      {activeTab === 22? <DescontoVolume />: <div></div>}
-      {activeTab === 23? <DescontoPorTipoDeCliente />: <div></div>}
-      {activeTab === 24? <FreteCIF />: <div></div>}
-      {activeTab === 26? <TipoDePedido />: <div></div>}
-      {activeTab === 27? <CondicoesDePagamento />: <div></div>}
-      {activeTab === 28? <PrazoDePagamento />: <div></div>}
-      {activeTab === 29? <DescontoComercial />: <div></div>}
-      {activeTab === 30? <LinhasDeProdutos />: <div></div>}
-      {activeTab === 31? <Margens />: <div></div>}
-      {activeTab === 32? <RegrasDePrecos />: <div></div>}
-      {activeTab === 33? <Mensagens />: <div></div>}
-      {activeTab === 34? <RegioesDeVendas />: <div></div>}
-      {activeTab === 35? <WorkFlow />: <div></div>}
-      {activeTab === 37? <PerfilDeAcesso />: <div></div>}
-      {activeTab === 38? <Usuarios />: <div></div>}
+      <ContentProvider> 
+        <Tabs />
+        {menuTabs.includes(2) ? <GraficosDashboard activeTab={activeTab === 2} />: <></>}
+        {menuTabs.includes(4) ? <Clientes activeTab={activeTab === 4} />: <></>}
+        {menuTabs.includes(5) ? <Representada activeTab={activeTab === 5} />: <></>}
+        {menuTabs.includes(7) ? <CadastroDeProdutos activeTab={activeTab === 7} />: <></>}
+        {menuTabs.includes(9) ? <TabelasDePrecos activeTab={activeTab === 9} />: <></>}
+        {menuTabs.includes(11) ? <WorkFlowDeOrcamentos activeTab={activeTab === 11} />: <></>}
+        {menuTabs.includes(12) ? <CarteiraDePedido activeTab={activeTab === 12} />: <></>}
+        {menuTabs.includes(14) ? <EmpresaControladora activeTab={activeTab === 14} />: <></>}
+        {menuTabs.includes(15) ? <LocaisDeVenda activeTab={activeTab === 15} />: <></>}
+        {menuTabs.includes(17) ? <Ofertas activeTab={activeTab === 17} />: <></>}
+        {menuTabs.includes(18) ? <PoliticasDeComissoes activeTab={activeTab === 18} />: <></>}
+        {menuTabs.includes(19) ? <ComissoesXDesconto activeTab={activeTab === 19} />: <></>}
+        {menuTabs.includes(20) ? <PrecoXEstrutura activeTab={activeTab === 20} />: <></>}
+        {menuTabs.includes(21) ? <PrecoXPrazo activeTab={activeTab === 21} />: <></>}
+        {menuTabs.includes(22) ? <DescontoVolume activeTab={activeTab === 22} />: <></>}
+        {menuTabs.includes(23) ? <DescontoPorTipoDeCliente activeTab={activeTab === 23} />: <></>}
+        {menuTabs.includes(24) ? <FreteCIF activeTab={activeTab === 24} />: <></>}
+        {menuTabs.includes(38) ? <TipoDePedido activeTab={activeTab === 38} />: <></>}
+        {menuTabs.includes(26) ? <CondicoesDePagamento activeTab={activeTab === 26} />: <></>}
+        {menuTabs.includes(27) ? <PrazoDePagamento activeTab={activeTab === 27} />: <></>}
+        {menuTabs.includes(28) ? <DescontoComercial activeTab={activeTab === 28} />: <></>}
+        {menuTabs.includes(29) ? <LinhasDeProdutos activeTab={activeTab === 29} />: <></>}
+        {menuTabs.includes(30) ? <Margens activeTab={activeTab === 30} />: <></>}
+        {menuTabs.includes(31) ? <RegrasDePrecos activeTab={activeTab === 31} />: <></>}
+        {menuTabs.includes(32) ? <Mensagens activeTab={activeTab === 32} />: <></>}
+        {menuTabs.includes(33) ? <RegioesDeVendas activeTab={activeTab === 33} />: <></>}
+        {menuTabs.includes(34) ? <WorkFlow activeTab={activeTab === 34} />: <></>}
+        {menuTabs.includes(36) ? <PerfilDeAcesso activeTab={activeTab === 36} />: <></>}
+        {menuTabs.includes(37) ? <Usuarios activeTab={activeTab === 37} />: <></>}
+        {position.map(popUp =>
+          <PopUp 
+          setIsDragging={setIsDragging}
+          position={position}
+          setPosition={setPosition}
+          startPosition={startPosition}
+          setStartPosition={setStartPosition}
+          divRef={divRef}
+          popUp={popUp.popUp}
+          />
+        )}
+        
+      </ContentProvider>
     </div>
   )
 }

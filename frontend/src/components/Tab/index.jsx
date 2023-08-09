@@ -1,5 +1,6 @@
 import React, {useContext} from 'react';
 import { MenuContext } from '../../contexts/menuContext';
+import { ContentContext } from '../../contexts/contentContext'
 import {AiOutlineClose, AiOutlineExpand} from 'react-icons/ai'
 
 
@@ -8,6 +9,7 @@ import './style.css';
 const Tab = ({titulo, idMenu}) => {
 
     const {menuTabs, setMenuTabs, activeTab, setActiveTab} = useContext(MenuContext);
+    const {setOpenContent} = useContext(ContentContext);
     
     const handleTabClick = (index) => {
         setActiveTab(index)
@@ -21,7 +23,10 @@ const Tab = ({titulo, idMenu}) => {
 
         if(index === activeTab){
           let tabs = menuTabs
-           if(menuTabs.length > 0){
+          if(menuTabs.length === 1){
+            setOpenContent(false)
+          }
+          if(menuTabs.length > 0){
             if(tabs[tabs.length -1] === index){
               tabs.pop()
               const newActive = tabs.length > 0 ? tabs[tabs.length -1] : 0
@@ -30,10 +35,10 @@ const Tab = ({titulo, idMenu}) => {
               const newActive = tabs.length > 0 ? tabs[tabs.length -1] : 0  
               setActiveTab(newActive);          
             }
-           }else{
+          }else{
             const newActive = 0
             setActiveTab(newActive);
-           }
+          }
         }
     }
 

@@ -1,104 +1,175 @@
-import React, {useState, useEffect} from 'react'
-import { useContext } from 'react';
-import { AuthContext } from '../../auth';
-import { MenuContext } from '../../contexts/menuContext';
+import styled from "styled-components";
+import {useState, useContext, useEffect} from 'react'
 
-import ItemMenu from '../ItemMenu';
-import SubItemMenu from '../SubItemMenu';
+import { MenuContext } from "../../contexts/menuContext";
 
-import './style.css'
+const SidebarComp = styled.aside`
+  display: ${props => props.open ? 'flex': 'none'};
+  flex-direction: column;
+  justify-content: flex-start;
+  height: 100vh;
+  width: 400px;
+  background-color: #2C3D5B;
+  overflow: hidden;
+`
 
-const Sidebar = () => {
+const ContentComp = styled.div`
+  height: 100%;
+  width: 97%;
+  overflow-y: auto;
+  overflow-x: hidden;
+`
 
-    const [menuItems, setMenuItems] = useState([]);
-    const [searchValue, setSearchValue] = useState('');
-    const [filteredMenu, setFilteredMenu] = useState([]);
+const Item = styled.div`
+    width: 99.1%;
+    padding: 5% 0;
+    font-size: 1.03rem;
+    border: 1px solid #273550;
+    margin-right: 2%;
+    cursor: pointer;
+    color: white;
 
-    const { isAuthenticated, setIsAuthenticated } = useContext(AuthContext);
-    const { activeMenu, openMenu }                = useContext(MenuContext);
+    p{
+      padding-left: 20px;
+    }
+`
 
-    const handleSearch = (event) => {
-      const value = event.target.value;
-      setSearchValue(value);
-      const filteredItens = menuItems.filter((item)=>
-        item.DescMenu.toLowerCase().includes(value.toLowerCase())
-      );
-      setFilteredMenu(filteredItens);
-    };
+const SubItem = styled.div`
+  width: 83%;
+  padding: 5% 0% 5% 16%;
+  font-size: 1rem;
+  border: 1px solid #273550;
+  cursor: pointer;
+  color: white;
+  display: ${props => props.open ? 'block': 'none'};
+`
 
-    const menuToRender = searchValue ? filteredMenu : menuItems;
+const Logo = styled.img`
+  margin-top: 10px;
+  margin-left: 15px;
+`
+const SearchInput = styled.input`
+  width: 100%;
+  height: 35px;
+  border-radius: 7px;
+  border: 1px solid white;
+
+  &::placeholder{
+    font-size: 16px;
+    padding-left: 10px;
+  }
+`
+
+export const Sidebar = () => {
+
+  const [searchValue, setSearchValue] = useState('');
+  const [filteredMenu, setFilteredMenu] = useState([]);
+  const {openMenu, menuTabs, setMenuTabs, activeTab, setActiveTab} = useContext(MenuContext)
+  const [openMenus, setOpenMenus] = useState([])
+  const [menuItens, setMenuItens] = useState([])
 
   useEffect(() => {
     async function fetchMenuItems() {
       try {
         const token     = localStorage.getItem('token');
-        const idUsuario = localStorage.getItem('idusuario');        
+        const idUsuario = localStorage.getItem('idusuario');  
+        let url = process.env.REACT_APP_API_URL + `menu/idusuario=${idUsuario}`;      
         
-        const response = await fetch('http://localhost:3030/menu', {
-          method: 'POST',
+        const response = await fetch( url, {
+          method: 'GET',
           headers: {
-            'Content-Type': 'application/json',
-             Authorization: `Bearer ${token}`
-            },
-          body: JSON.stringify({
-             idusuario: idUsuario,
-            })
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`
+            }
           });
         const data = await response.json();
-
-        setMenuItems(data.data[0]);
-
-        setIsAuthenticated(true);
-
-        await localStorage.setItem('menus', JSON.stringify(data.data[0]))
+  
+        setMenuItens(data.data);
+  
+        await localStorage.setItem('menus', JSON.stringify(data.data))
       } catch (error) {
         console.error(error);
       }
     }
-    fetchMenuItems();
-  }, []);
- 
-  return (
-      <div className={openMenu ? 'sidebar-open' + ' container-sidebar' : 'sidebar-closed' + ' container-sidebar'}>
-        <div className="sidebar-img">
-          <img src="../assets/logo-afv-sidebar.png" alt="logo-afv" />
-        </div>
-        <input  
-          type="search" 
-          name="menu-search" 
-          placeholder='Buscar no menu'
-          onChange={handleSearch}
-        />
-        <div>
-          {searchValue ? filteredMenu.map((item) => {
-            if(item.IDMenuPai > 0){
-                return <SubItemMenu 
-                          key={item.IDMenu} 
-                          idMenu = {item.IDMenu}
-                          className={'item-menu-open'} 
-                          titulo={item.DescMenu} 
-                        />;}})
-          
-          :menuItems.map((item) => {
-            if(item.IDMenuPai > 0){
-                return <SubItemMenu 
-                          key={item.IDMenu} 
-                          idMenu = {item.IDMenu}
-                          className={Array.isArray(activeMenu) && activeMenu.includes(item.IDMenuPai) ? 'item-menu-open' : 'item-menu-closed'} 
-                          titulo={item.DescMenu} 
-                        />; // 
-            }
-            return <ItemMenu 
-                      key={item.IDMenu} 
-                      titulo={item.DescMenu} 
-                      idMenu = {item.IDMenu} 
-                    />
-          })}
+  
+    fetchMenuItems()
+  }, [])
 
-        </div>
-      </div>
-    
+  
+
+
+  const handleClickItem = (IDMenuPai) => {
+    if(openMenus.includes(IDMenuPai)){
+      let array = [...openMenus]
+      array.splice(array.indexOf(IDMenuPai, 1))
+      setOpenMenus(array)
+    }else{
+      setOpenMenus([...openMenus, IDMenuPai]) 
+    } 
+  }
+
+  const handleMapItens = (item) => { 
+    if(item.IDMenuPai > 0){
+      return  <SubItem 
+                open={openMenus.includes(item.IDMenuPai)} 
+                key={item.IDMenu} 
+                onClick={() => handleClickSubMenuItem(item.IDMenu)}
+              >{item.DescMenu}
+              </SubItem>; // 
+    }
+    return  <Item 
+              key={item.IDMenu} 
+              data={item.IDMenuPai} 
+              onClick={() => handleClickItem(item.IDMenu)}
+              ><p>{item.DescMenu}</p>
+            </Item>
+  } 
+
+  const handleClickSubMenuItem = (idMenu) =>{
+    if(menuTabs.length > 0){
+        if(menuTabs.includes(idMenu)){
+          setActiveTab(idMenu)
+        }else{
+          setMenuTabs([...menuTabs, idMenu])
+          setActiveTab(idMenu)
+        }
+      }else{
+      setMenuTabs([idMenu])
+      setActiveTab(idMenu)
+    }
+    console.log(menuTabs)
+  }
+
+  const handleMapSubItens = (item) => {
+    if(item.IDMenuPai > 0){
+      return  <SubItem 
+                open={true} 
+                key={item.IDMenu} 
+                onClick={() => handleClickSubMenuItem(item.IDMenu)}
+              >
+              {item.DescMenu}
+              </SubItem>; // 
+    }
+  }
+
+  const handleSearch = (event) => {
+    const value = event.target.value;
+    setSearchValue(value);
+    const filteredItens = menuItens.filter((item)=>
+      item.DescMenu.toLowerCase().includes(value.toLowerCase())
+    );
+    setFilteredMenu(filteredItens);
+  };
+
+
+
+  return(
+    <SidebarComp open={openMenu}>
+      <ContentComp>
+        <Logo src="assets/logo-afv-sidebar.png" />
+        <SearchInput type="text" placeholder="Busque no menu" onChange={handleSearch} />
+        {searchValue ? filteredMenu.map(handleMapSubItens) : menuItens.map(handleMapItens)}
+      </ContentComp>
+    </SidebarComp>
   )
 }
-
-export default Sidebar

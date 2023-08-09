@@ -2,7 +2,7 @@
   "name": "backend",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "index.cjs",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon src/index.js",
@@ -16,8 +16,11 @@
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
+    "fs": "^0.0.1-security",
+    "https": "^1.0.0",
     "ip": "^1.1.8",
     "jsonwebtoken": "^9.0.0",
+    "mssql": "^9.1.1",
     "mysql2": "^3.2.0",
     "nodemon": "^2.0.21",
     "sequelize": "^6.29.3"
